@@ -1,0 +1,8 @@
+# Node modules anywhere
+node_modules/
+
+# Hardhat outputs in contracts/
+contracts/artifacts/
+contracts/cache/
+contracts/types/
+contracts/coverage/
