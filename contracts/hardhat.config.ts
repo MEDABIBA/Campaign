@@ -13,11 +13,8 @@ const config: HardhatUserConfig = {
   },
   networks: {
     sepolia: {
-      url: "https://mainnet.infura.io/v3/7fbde31208034b8491c407c70cbd2379",
-      accounts:
-        "bb1be169d29c436dbc2803aee09ddda41c0bf747b466a33161d75c380bc3b580"
-          ? ["bb1be169d29c436dbc2803aee09ddda41c0bf747b466a33161d75c380bc3b580"]
-          : [],
+      url: "https://sepolia.infura.io/v3/7fbde31208034b8491c407c70cbd2379",
+      accounts: ["bb1be169d29c436dbc2803aee09ddda41c0bf747b466a33161d75c380bc3b580"],
     },
   },
 };
