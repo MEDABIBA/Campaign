@@ -29,6 +29,8 @@ export interface CampaignInterface extends Interface {
       | "contribute"
       | "createRequest"
       | "finalizeRequest"
+      | "getRequestsCount"
+      | "getSummary"
       | "manager"
       | "minimumContribution"
       | "requests"
@@ -54,6 +56,14 @@ export interface CampaignInterface extends Interface {
     functionFragment: "finalizeRequest",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "getRequestsCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getSummary",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "manager", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "minimumContribution",
@@ -78,6 +88,11 @@ export interface CampaignInterface extends Interface {
     functionFragment: "finalizeRequest",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRequestsCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getSummary", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "minimumContribution",
@@ -151,6 +166,14 @@ export interface Campaign extends BaseContract {
     "nonpayable"
   >;
 
+  getRequestsCount: TypedContractMethod<[], [bigint], "view">;
+
+  getSummary: TypedContractMethod<
+    [],
+    [[bigint, bigint, bigint, bigint, string]],
+    "view"
+  >;
+
   manager: TypedContractMethod<[], [string], "view">;
 
   minimumContribution: TypedContractMethod<[], [bigint], "view">;
@@ -192,6 +215,16 @@ export interface Campaign extends BaseContract {
   getFunction(
     nameOrSignature: "finalizeRequest"
   ): TypedContractMethod<[index: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "getRequestsCount"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getSummary"
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint, bigint, bigint, string]],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "manager"
   ): TypedContractMethod<[], [string], "view">;

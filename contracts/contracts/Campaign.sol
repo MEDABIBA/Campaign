@@ -38,6 +38,24 @@ contract Campaign {
         _;
     }
 
+    function getSummary()
+        public
+        view
+        returns (uint, uint, uint, uint, address)
+    {
+        return (
+            address(this).balance,
+            minimumContribution,
+            requests.length,
+            approversCount,
+            manager
+        );
+    }
+
+    function getRequestsCount() public view returns (uint) {
+        return requests.length;
+    }
+
     function contribute() public payable {
         require(msg.value >= minimumContribution);
         approvers[msg.sender] = true;
