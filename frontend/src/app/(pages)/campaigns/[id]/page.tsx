@@ -7,19 +7,31 @@ import CardGroup from "semantic-ui-react/dist/commonjs/views/Card/CardGroup";
 import CardHeader from "semantic-ui-react/dist/commonjs/views/Card/CardHeader";
 import CardMeta from "semantic-ui-react/dist/commonjs/views/Card/CardMeta";
 
-import { useState } from "react";
-import { Form, Grid, GridColumn, Input } from "semantic-ui-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Form, Grid, GridColumn, Input, Loader, Message, MessageHeader } from "semantic-ui-react";
 import { Address } from "viem";
-import { useReadContract } from "wagmi";
+import { useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { abi } from "../../../web3/campaign.abi";
 export default function CampaignShow() {
   const [inputValue, setInputvalue] = useState("");
+  const [isNumber, setIsNumber] = useState(true);
   const { id } = useParams();
-  const { data, isLoading } = useReadContract({
+  const { data, isLoading, refetch } = useReadContract({
     abi,
     address: id as Address,
     functionName: "getSummary",
-  }) as { data: number[]; isLoading: boolean };
+  }) as { data: number[]; isLoading: boolean; refetch: () => void };
+  const { data: hash, error, writeContract, isPending } = useWriteContract();
+  const { isSuccess: isConfirmed, isError, error: txError } = useWaitForTransactionReceipt({ hash });
+  useEffect(() => {
+    if (isConfirmed) {
+      console.log("Transaction confirmed");
+      refetch();
+    } else if (isError) {
+      console.error("Transaction failed, error:", txError);
+    }
+  }, [isConfirmed]);
   if (isLoading) {
     return (
       <Layout>
@@ -50,9 +62,24 @@ export default function CampaignShow() {
     },
   ];
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    return true;
+    try {
+      if (typeof Number(inputValue) === "number" && Number(inputValue) >= 1) {
+        setIsNumber(true);
+        await writeContract({
+          abi,
+          address: id as `0x${string}`,
+          functionName: "contribute",
+          value: BigInt(inputValue),
+        });
+      } else {
+        console.log("nan");
+        setIsNumber(false);
+      }
+    } catch (err) {
+      console.error("there is some error: ", error);
+    }
   }
   return (
     <Layout>
@@ -82,9 +109,26 @@ export default function CampaignShow() {
               onChange={(event, data) => setInputvalue(data.value)}
               value={inputValue}
             />
-            <button className="ui primary button">Contribute!</button>
+            <button className="ui primary button">
+              {isPending ? <Loader active inline size="mini" /> : "Contribute!"}
+            </button>
           </Form>
+          {!isNumber && (
+            <Message size="large" negative>
+              <MessageHeader>Oops!</MessageHeader>
+              <p>Value is not a number </p>
+            </Message>
+          )}
+          {error && (
+            <Message size="large" negative>
+              <MessageHeader>Oops!</MessageHeader>
+              <p>{error.message} </p>
+            </Message>
+          )}
         </GridColumn>
+        <Link href={`/campaigns/${id}/requests`}>
+          <button className="ui primary button">View Requests</button>
+        </Link>
       </Grid>
     </Layout>
   );
