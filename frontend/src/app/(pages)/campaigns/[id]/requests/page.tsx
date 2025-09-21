@@ -5,9 +5,22 @@ import { useParams } from "next/navigation";
 import { Abi, Address } from "viem";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { abi } from "@/app/web3/campaign.abi";
-import { useEffect, useMemo } from "react";
-import { Label, TableCell, Table, TableBody, TableHeader, TableHeaderCell, TableRow } from "semantic-ui-react";
-import { writeContract } from "viem/actions";
+import { useMemo } from "react";
+import {
+  TableCell,
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderCell,
+  TableRow,
+  GridRow,
+  Grid,
+  GridColumn,
+} from "semantic-ui-react";
+import "./index.css";
+import buildRequestContracts from "@/app/helper/buildRequestContracts";
+import { request } from "http";
+import RequestDataRender from "@/app/components/RequestDataRender";
 
 export default function RequestsPage() {
   const { id } = useParams();
@@ -25,38 +38,36 @@ export default function RequestsPage() {
   }) as { data: [bigint, bigint, bigint, bigint, string] };
 
   const contracts = useMemo(() => {
-    if (!requestsCount || Number(requestsCount) === 0) return [];
-    return Array.from({ length: Number(requestsCount) }, (_, i) => ({
-      address: id as Address,
-      abi: abi as Abi,
-      functionName: "requests",
-      args: [i],
-    }));
+    return buildRequestContracts(requestsCount as string, id as Address, abi as Abi);
   }, [requestsCount, id]);
   const { data: requestsData } = useReadContracts({ contracts });
 
-  function onSubmit(e: React.FormEvent, index: number) {
+  function actionHandler(e: React.FormEvent, funcName: "approveRequest" | "finalizeRequest", index: number) {
     e.preventDefault;
     writeContract({
       address: id as Address,
       abi,
-      functionName: "approveRequest",
+      functionName: funcName,
       args: [index],
     });
   }
-  function onFinalize(e: React.FormEvent, index: number) {
-    e.preventDefault;
-    writeContract({
-      address: id as Address,
-      abi,
-      functionName: "finalizeRequest",
-      args: [index],
-    });
-  }
-  console.log(requestsData);
   return (
     <Layout>
-      <h2>Requests</h2>
+      <Grid>
+        <GridRow>
+          <GridColumn width={8}>
+            <h2>Requests</h2>
+          </GridColumn>
+          <GridColumn width={8} textAlign="right">
+            <Link href={`/campaigns/${id}/requests/new`}>
+              <button className="ui primary button" style={{ marginBottom: "15px" }}>
+                Add Request
+              </button>
+            </Link>
+          </GridColumn>
+        </GridRow>
+      </Grid>
+
       <Table celled>
         <TableHeader>
           <TableRow>
@@ -70,46 +81,15 @@ export default function RequestsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requestsData?.map((request, index) => {
-            if (request.status == "success") {
-              const result = request.result as [string, string, string, boolean, string];
-              return (
-                <TableRow
-                  key={index}
-                  positive={Number(result[4]) > Number(summaryData?.[3]) / 2 && !result[3]}
-                  disabled={result[3]}>
-                  <TableCell>{index}</TableCell>
-                  <TableCell>{result[1]}</TableCell>
-                  <TableCell>{result[0]}</TableCell>
-                  <TableCell>{result[2]}</TableCell>
-                  <TableCell>
-                    {result[4]}/{summaryData?.[3]}
-                  </TableCell>
-                  <TableCell>
-                    {!result[3] && (
-                      <button className="ui basic green button" onClick={(e) => onSubmit(e, index)}>
-                        Approve
-                      </button>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {!result[3] && (
-                      <button className="ui teal basic button" onClick={(e) => onFinalize(e, index)}>
-                        Finalize
-                      </button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            } else return null;
-          })}
+          <RequestDataRender
+            requestsData={requestsData}
+            summaryData={summaryData}
+            id={id as Address}
+            abi={abi as Abi}
+          />
         </TableBody>
       </Table>
-      <Link href={`/campaigns/${id}/requests/new`}>
-        <button className="ui primary button" style={{ marginBottom: "15px" }}>
-          Add Request
-        </button>
-      </Link>
+      <div>{`Found ${requestsCount} requests`}</div>
     </Layout>
   );
 }

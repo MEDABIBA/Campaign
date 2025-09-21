@@ -1,0 +1,9 @@
+.ui.basic.green.button.hover-green:hover {
+  background-color: green !important;
+  color: white !important;
+}
+
+.ui.basic.teal.button.hover-teal:hover {
+  background-color: teal !important;
+  color: white !important;
+}

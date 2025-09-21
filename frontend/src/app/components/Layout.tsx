@@ -7,7 +7,6 @@ export const Layout = (props: React.PropsWithChildren) => {
     <Container style={{ margin: "25px" }}>
       <Header />
       {props.children}
-      <h1>Footer</h1>
     </Container>
   );
 };

@@ -1,17 +1,17 @@
 "use client";
+import ErrorMessage from "@/app/components/ErrorMessage";
 import { Layout } from "@/app/components/Layout";
 import { config } from "@/app/web3/FactoryConfig";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Form, FormField, Input, Loader, Message, MessageHeader } from "semantic-ui-react";
-import { useAccount, useWriteContract } from "wagmi";
+import { Form, FormField, Input, Loader } from "semantic-ui-react";
+import { useWriteContract } from "wagmi";
 
 export default function CampaignNew() {
   const [contribution, setContribution] = useState("");
   const [isNumber, setIsNumber] = useState(true);
-  const account = useAccount();
   const router = useRouter();
-  const { data: hash, error, writeContract, isPending, isSuccess } = useWriteContract();
+  const { error, writeContract, isPending, isSuccess } = useWriteContract();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     try {
@@ -36,6 +36,7 @@ export default function CampaignNew() {
       router.push("/");
     }
   }, [isSuccess]);
+
   return (
     <Layout>
       <h2>Create New Campaign</h2>
@@ -46,26 +47,18 @@ export default function CampaignNew() {
             name="minimumContribution"
             label="wei"
             labelPosition="right"
-            placeholder="Minimum Contribution In Wei"
+            placeholder="e.g., 1000000000000000000 (1 ETH)"
             value={contribution}
+            disabled={isPending}
+            error={!isNumber}
             onChange={(e) => setContribution(e.target.value)}
           />
         </FormField>
         <button type="submit" className="ui primary button">
           {isPending ? <Loader active inline size="mini" /> : "Create!"}
         </button>
-        {error && (
-          <Message size="big" negative>
-            <MessageHeader>Oops!</MessageHeader>
-            <p>{error.message} </p>
-          </Message>
-        )}
-        {!isNumber && (
-          <Message size="big" negative>
-            <MessageHeader>Oops!</MessageHeader>
-            <p>Value is not a number </p>
-          </Message>
-        )}
+        <ErrorMessage error={error} />
+        <ErrorMessage error={isNumber} />
       </Form>
     </Layout>
   );
