@@ -2,6 +2,6 @@
 import { Address } from "viem";
 import { abi } from "./factory.abi";
 export const config = {
-  address: "0xa0237351b88E96c4Dd8F8dFDfb8645728Fa66148" as Address,
+  address: "0x31C53B5a319c175dea509C9cE627F673EA97899E" as Address,
   abi,
 };

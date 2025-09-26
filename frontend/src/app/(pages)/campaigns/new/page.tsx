@@ -1,4 +1,5 @@
 "use client";
+import Button from "@/app/components/Button";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import { Layout } from "@/app/components/Layout";
 import { config } from "@/app/web3/FactoryConfig";
@@ -54,9 +55,7 @@ export default function CampaignNew() {
             onChange={(e) => setContribution(e.target.value)}
           />
         </FormField>
-        <button type="submit" className="ui primary button">
-          {isPending ? <Loader active inline size="mini" /> : "Create!"}
-        </button>
+        <Button isPending={isPending} inscription={"Create!"} />
         <ErrorMessage error={error} />
         <ErrorMessage error={isNumber} />
       </Form>

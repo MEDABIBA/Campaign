@@ -14,7 +14,7 @@ export default function ErrorMessage({ error }: { error: Error | boolean | null 
     return error ? (
       <Message size="big" negative>
         <MessageHeader>Oops!</MessageHeader>
-        <p>{error.message} </p>
+        <p style={{ overflow: "auto" }}>{error.message} </p>
       </Message>
     ) : null;
   }

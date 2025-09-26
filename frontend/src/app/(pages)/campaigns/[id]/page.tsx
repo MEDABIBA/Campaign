@@ -11,6 +11,7 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import validateInput from "@/app/helper/validateInput";
 import CampaignSummary from "@/app/components/CampaignSummary";
+import Button from "@/app/components/Button";
 
 export default function CampaignShow() {
   const [inputValue, setInputvalue] = useState("");
@@ -24,6 +25,7 @@ export default function CampaignShow() {
     e.preventDefault();
     try {
       if (validateInput(inputValue, Number(minimumContribution), setErrorMessage)) {
+        setInputvalue("");
         await writeContract({
           abi,
           address: id as `0x${string}`,
@@ -64,14 +66,12 @@ export default function CampaignShow() {
               value={inputValue}
             />
             {errorMessage && <h3 style={{ color: "red" }}>{errorMessage}</h3>}
-            <button className="ui primary button">
-              {isPending ? <Loader active inline size="mini" /> : "Contribute!"}
-            </button>
+            <Button isPending={isPending} inscription="Contribute!" />
           </Form>
           <ErrorMessage error={error} />
         </GridColumn>
         <Link href={`/campaigns/${id}/requests`}>
-          <button className="ui primary button">View Requests</button>
+          <Button isPending={false} inscription="View Requests" />
         </Link>
       </Grid>
     </Layout>

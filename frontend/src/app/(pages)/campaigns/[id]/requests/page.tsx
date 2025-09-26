@@ -3,29 +3,22 @@ import { Layout } from "@/app/components/Layout";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Abi, Address } from "viem";
-import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import { abi } from "@/app/web3/campaign.abi";
-import { useMemo } from "react";
-import {
-  TableCell,
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
-  GridRow,
-  Grid,
-  GridColumn,
-} from "semantic-ui-react";
+import { useMemo, useState } from "react";
+import { Table, TableBody, TableHeader, TableHeaderCell, TableRow, GridRow, Grid, GridColumn } from "semantic-ui-react";
 import "./index.css";
 import buildRequestContracts from "@/app/helper/buildRequestContracts";
-import { request } from "http";
 import RequestDataRender from "@/app/components/RequestDataRender";
+import Button from "@/app/components/Button";
+import BackButton from "@/app/components/BackButton";
+import { CombinedError } from "@/app/types";
+import ErrorMessage from "@/app/components/ErrorMessage";
 
 export default function RequestsPage() {
   const { id } = useParams();
+  const [combinedError, setCombinedError] = useState<CombinedError>(null);
 
-  const { writeContract, error, isSuccess } = useWriteContract();
   const { data: requestsCount } = useReadContract({
     address: id as Address,
     abi,
@@ -41,28 +34,17 @@ export default function RequestsPage() {
     return buildRequestContracts(requestsCount as string, id as Address, abi as Abi);
   }, [requestsCount, id]);
   const { data: requestsData } = useReadContracts({ contracts });
-
-  function actionHandler(e: React.FormEvent, funcName: "approveRequest" | "finalizeRequest", index: number) {
-    e.preventDefault;
-    writeContract({
-      address: id as Address,
-      abi,
-      functionName: funcName,
-      args: [index],
-    });
-  }
   return (
     <Layout>
       <Grid>
         <GridRow>
           <GridColumn width={8}>
             <h2>Requests</h2>
+            <BackButton route={`/campaigns/${id}`} />
           </GridColumn>
           <GridColumn width={8} textAlign="right">
             <Link href={`/campaigns/${id}/requests/new`}>
-              <button className="ui primary button" style={{ marginBottom: "15px" }}>
-                Add Request
-              </button>
+              <Button isPending={false} inscription="Add Request" style={{ marginBottom: "15px" }} />
             </Link>
           </GridColumn>
         </GridRow>
@@ -86,9 +68,11 @@ export default function RequestsPage() {
             summaryData={summaryData}
             id={id as Address}
             abi={abi as Abi}
+            setCombinedError={setCombinedError}
           />
         </TableBody>
       </Table>
+      <ErrorMessage error={combinedError} />
       <div>{`Found ${requestsCount} requests`}</div>
     </Layout>
   );
