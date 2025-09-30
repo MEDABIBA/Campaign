@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cards } from "../types";
+import type { Cards } from "../types";
 import { memo } from "react";
 
 const Cards = memo(({ data }: Cards) => {
